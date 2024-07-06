@@ -8,7 +8,7 @@ import (
 	"io"
 	"os"
 	"strings"
-	"todo-cli"
+	"todo"
 )
 
 const (
