@@ -30,6 +30,17 @@ func (t *Todos) Add(task string) {
 	*t = append(*t, todo)
 }
 
+// func (t *Todos) Add() {
+// 	todo := Item{
+// 		Task:        task,
+// 		IsDone:      false,
+// 		CreatedAt:   time.Now(),
+// 		CompletedAt: time.Time{},
+// 	}
+
+// 	*t = append(*t, todo)
+// }
+
 func (t *Todos) Complete(index int) error {
 	ls := *t
 	if index <= 0 || index > len(ls) {

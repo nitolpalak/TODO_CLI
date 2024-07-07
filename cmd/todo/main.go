@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strconv"
 	"strings"
 	"todo"
 )
@@ -23,6 +24,13 @@ func main() {
 
 	flag.Parse()
 
+	handleError := func(err error, msg string) {
+		if err != nil {
+			fmt.Println(msg, err)
+			os.Exit(1)
+		}
+	}
+
 	todos := &todo.Todos{}
 
 	if err := todos.Load(todofile); err != nil {
@@ -32,40 +40,37 @@ func main() {
 
 	switch {
 	case *add:
-		task, err := getInput(os.Stdin, flag.Args()...)
-		if err != nil {
-			fmt.Println(err.Error())
-			os.Exit(1)
-		}
+		msg := "The name of the task: "
+		task, err := getInput(msg, os.Stdin, flag.Args()...)
+		handleError(err, "Error getting input:")
 
 		todos.Add(task)
 		err = todos.Store(todofile)
-		if err != nil {
-			fmt.Println(err.Error())
-			os.Exit(1)
+		handleError(err, "Error storing data:")
+	case *complete == 0 && !*list:
+		id := *complete
+		if *complete == 0 {
+			msg := "ID of the task you want to list as completed: "
+			text, err := getInput(msg, os.Stdin, flag.Args()...)
+			handleError(err, "Error getting input:")
+			id, err = strconv.Atoi(text)
+			handleError(err, "Error converting data:")
 		}
+		err := todos.Complete(id)
+		handleError(err, "Error function call:")
+		err = todos.Store(todofile)
+		handleError(err, "Error storing data:")
 	case *complete > 0:
 		err := todos.Complete(*complete)
-		if err != nil {
-			fmt.Println(err.Error())
-			os.Exit(1)
-		}
+		handleError(err, "Error function call:")
+
 		err = todos.Store(todofile)
-		if err != nil {
-			fmt.Println(err.Error())
-			os.Exit(1)
-		}
+		handleError(err, "Error storing data:")
 	case *delete > 0:
 		err := todos.Delete(*delete)
-		if err != nil {
-			fmt.Println(err.Error())
-			os.Exit(1)
-		}
+		handleError(err, "Error function call:")
 		err = todos.Store(todofile)
-		if err != nil {
-			fmt.Println(err.Error())
-			os.Exit(1)
-		}
+		handleError(err, "Error storing data:")
 	case *list:
 		todos.Show()
 	default:
@@ -74,11 +79,13 @@ func main() {
 	}
 }
 
-func getInput(r io.Reader, args ...string) (string, error) {
+func getInput(msg string, r io.Reader, args ...string) (string, error) {
 
 	if len(args) > 0 {
 		return strings.Join(args, " "), nil
 	}
+
+	fmt.Print(msg)
 
 	scanner := bufio.NewScanner(r)
 	scanner.Scan()
