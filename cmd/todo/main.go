@@ -48,15 +48,12 @@ func main() {
 		err = todos.Store(todofile)
 		handleError(err, "Error storing data:")
 	case *complete == 0 && !*list:
-		id := *complete
-		if *complete == 0 {
-			msg := "ID of the task you want to list as completed: "
-			text, err := getInput(msg, os.Stdin, flag.Args()...)
-			handleError(err, "Error getting input:")
-			id, err = strconv.Atoi(text)
-			handleError(err, "Error converting data:")
-		}
-		err := todos.Complete(id)
+		msg := "ID of the task you want to list as completed: "
+		text, err := getInput(msg, os.Stdin, flag.Args()...)
+		handleError(err, "Error getting input:")
+		id, err := strconv.Atoi(text)
+		handleError(err, "Error converting data:")
+		err = todos.Complete(id)
 		handleError(err, "Error function call:")
 		err = todos.Store(todofile)
 		handleError(err, "Error storing data:")
