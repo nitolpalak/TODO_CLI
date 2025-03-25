@@ -8,6 +8,9 @@
 *.so
 *.dylib
 
+# Data file
+.todo.json
+
 # Test binary, built with `go test -c`
 *.test
 

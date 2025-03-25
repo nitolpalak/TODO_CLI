@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strconv"
 	"strings"
 	"todo"
 )
@@ -21,7 +20,9 @@ func main() {
 	complete := flag.Int("complete", 0, "mark a todo as completed")
 	delete := flag.Int("delete", 0, "delete a todo")
 	list := flag.Bool("list", false, "show the list of all todos")
+	help := flag.Bool("help", false, "help by providing arguments list")
 
+	flag.Usage = showHelp
 	flag.Parse()
 
 	handleError := func(err error, msg string) {
@@ -43,18 +44,7 @@ func main() {
 		msg := "The name of the task: "
 		task, err := getInput(msg, os.Stdin, flag.Args()...)
 		handleError(err, "Error getting input:")
-
 		todos.Add(task)
-		err = todos.Store(todofile)
-		handleError(err, "Error storing data:")
-	case *complete == 0 && !*list:
-		msg := "ID of the task you want to list as completed: "
-		text, err := getInput(msg, os.Stdin, flag.Args()...)
-		handleError(err, "Error getting input:")
-		id, err := strconv.Atoi(text)
-		handleError(err, "Error converting data:")
-		err = todos.Complete(id)
-		handleError(err, "Error function call:")
 		err = todos.Store(todofile)
 		handleError(err, "Error storing data:")
 	case *complete > 0:
@@ -70,6 +60,8 @@ func main() {
 		handleError(err, "Error storing data:")
 	case *list:
 		todos.Show()
+	case flag.NFlag() == 0 || *help:
+		showHelp()
 	default:
 		fmt.Println("invalid command")
 		os.Exit(1)
@@ -97,5 +89,13 @@ func getInput(msg string, r io.Reader, args ...string) (string, error) {
 	}
 
 	return text, nil
+}
 
+func showHelp() {
+	fmt.Println("Usage:")
+	fmt.Println("  -add         Add a new task")
+	fmt.Println("  -complete N  Mark task N as completed")
+	fmt.Println("  -delete N    Delete task N")
+	fmt.Println("  -list        Show all tasks")
+	os.Exit(1)
 }
